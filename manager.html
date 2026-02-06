@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>لوحة المدير | Manager</title>
+<style>
+:root{
+  --bg:#0b1220;
+  --card:#0f1a33;
+  --line:rgba(255,255,255,.10);
+  --text:#eef3ff;
+  --muted:#a6b6ea;
+  --blue:#2b6bff;
+  --green:#18c37e;
+  --red:#ff4d4d;
+  --amber:#ffb020;
+  --shadow: 0 14px 34px rgba(0,0,0,.35);
+  --r:18px;
+  --r2:22px;
+  --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Kufi Arabic","Noto Sans Arabic", Tahoma, Arial;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:var(--font);
+  color:var(--text);
+  background:
+    radial-gradient(1100px 650px at 10% 0%, rgba(43,107,255,.22), transparent 55%),
+    radial-gradient(900px 650px at 100% 10%, rgba(24,195,126,.12), transparent 55%),
+    radial-gradient(800px 520px at 40% 90%, rgba(255,176,32,.10), transparent 60%),
+    var(--bg);
+  direction:rtl;
+}
+a{color:inherit}
+button,input,select,textarea{font-family:inherit}
+.container{max-width:1180px; margin:0 auto; padding:16px}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 14px;
+  border:1px solid var(--line);
+  border-radius:var(--r2);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  box-shadow:var(--shadow);
+  position:sticky; top:12px; z-index:30; backdrop-filter: blur(10px);
+}
+.brand{display:flex; align-items:center; gap:10px; min-width:0}
+.logo{
+  width:44px;height:44px;border-radius:14px;
+  border:1px solid var(--line);
+  background:linear-gradient(135deg, rgba(43,107,255,.35), rgba(24,195,126,.20));
+  overflow:hidden; display:grid; place-items:center;
+}
+.logo img{width:100%;height:100%;object-fit:cover}
+.brand .txt{display:flex;flex-direction:column;min-width:0}
+.brand .txt b{font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand .txt span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.actions{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.pill{
+  padding:8px 10px; border-radius:999px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.03);
+  font-size:12px; color:var(--muted);
+}
+.btn{
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.06);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  font-weight:900;
+  display:inline-flex; align-items:center; gap:8px;
+}
+.btn:active{transform:translateY(1px)}
+.btn.primary{background:linear-gradient(135deg, rgba(43,107,255,.95), rgba(43,107,255,.70)); border-color:rgba(43,107,255,.35)}
+.btn.green{background:linear-gradient(135deg, rgba(24,195,126,.95), rgba(24,195,126,.70)); border-color:rgba(24,195,126,.35)}
+.btn.red{background:linear-gradient(135deg, rgba(255,77,77,.95), rgba(255,77,77,.70)); border-color:rgba(255,77,77,.35)}
+.btn.ghost{background:transparent}
+.grid{display:grid; gap:14px}
+@media(min-width:920px){ .grid.cols2{grid-template-columns: 1.2fr .8fr} }
+.card{
+  border:1px solid var(--line);
+  border-radius:var(--r2);
+  background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.card .hd{padding:14px 14px 10px; border-bottom:1px solid var(--line); display:flex; align-items:flex-start; justify-content:space-between; gap:10px}
+.card .hd h2{margin:0; font-size:14px}
+.card .hd p{margin:6px 0 0; font-size:12px; color:var(--muted)}
+.card .bd{padding:14px}
+.row{display:grid; gap:10px}
+@media(min-width:820px){
+  .row.cols2{grid-template-columns:1fr 1fr}
+  .row.cols3{grid-template-columns:1fr 1fr 1fr}
+  .row.cols4{grid-template-columns:1fr 1fr 1fr 1fr}
+}
+.field{display:flex; flex-direction:column; gap:6px}
+label{font-size:12px; color:var(--muted)}
+input,select,textarea{
+  width:100%;
+  padding:12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background:rgba(10,16,30,.55);
+  color:var(--text);
+  outline:none;
+}
+textarea{min-height:96px; resize:vertical}
+.small{font-size:12px; color:var(--muted)}
+hr.sep{border:none;border-top:1px solid var(--line); margin:12px 0}
+.tableWrap{overflow:auto; border:1px solid var(--line); border-radius:16px}
+table{width:100%; border-collapse:collapse; min-width:860px; background:rgba(0,0,0,.15)}
+th,td{padding:10px; border-bottom:1px solid var(--line); text-align:right; font-size:12px}
+th{color:var(--muted); font-weight:900; background:rgba(255,255,255,.04); position:sticky; top:0}
+tr:hover td{background:rgba(255,255,255,.03)}
+.tag{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+  background:rgba(255,255,255,.03); font-size:12px; color:var(--muted)
+}
+.tag.good{color:#bff7df; border-color:rgba(24,195,126,.30); background:rgba(24,195,126,.10)}
+.tag.bad{color:#ffc0c0; border-color:rgba(255,77,77,.30); background:rgba(255,77,77,.10)}
+.tag.warn{color:#ffe0b3; border-color:rgba(255,176,32,.30); background:rgba(255,176,32,.10)}
+.toast{
+  position:fixed; inset:auto 14px 14px 14px; max-width:720px; margin:0 auto;
+  display:none; gap:10px; align-items:flex-start;
+  background:rgba(10,16,30,.92);
+  border:1px solid var(--line);
+  border-radius:18px; padding:12px;
+  box-shadow:var(--shadow);
+  z-index:120;
+}
+.toast.show{display:flex}
+.toast .dot{width:10px;height:10px;border-radius:999px;background:var(--green); margin-top:6px}
+.toast .msg{font-size:13px; line-height:1.4}
+.drawerOverlay{position:fixed; inset:0; background:rgba(0,0,0,.55); display:none; z-index:60}
+.drawerOverlay.show{display:block}
+.drawer{
+  position:fixed; inset:0 auto 0 0; width:min(320px, 88vw);
+  background:linear-gradient(180deg, rgba(15,26,51,.98), rgba(11,18,32,.98));
+  border-right:1px solid var(--line);
+  transform:translateX(-105%); transition:transform .25s ease;
+  z-index:70;
+  padding:14px;
+  display:flex; flex-direction:column; gap:12px;
+}
+.drawer.show{transform:translateX(0)}
+.nav{display:flex; flex-direction:column; gap:8px}
+.nav button{
+  width:100%;
+  text-align:right;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:900;
+}
+.nav button.active{border-color:rgba(43,107,255,.55); background:rgba(43,107,255,.15)}
+.kpis{display:grid; gap:10px}
+@media(min-width:820px){.kpis{grid-template-columns:repeat(4,1fr)}}
+.kpi{padding:12px;border:1px solid var(--line); border-radius:18px; background:rgba(255,255,255,.03)}
+.kpi b{display:block; font-size:12px; color:var(--muted)}
+.kpi span{display:block; font-size:18px; font-weight:1000; margin-top:6px}
+.badge{
+  display:inline-flex; align-items:center; gap:8px;
+  border:1px solid var(--line); border-radius:16px; padding:10px 12px;
+  background:rgba(255,255,255,.03);
+  font-size:12px; color:var(--muted)
+}
+.loginTabs{display:flex; gap:10px; flex-wrap:wrap}
+.loginTabs .btn{flex:1}
+.hint{font-size:12px;color:var(--muted)}
+.printArea{direction:rtl; font-family:var(--font); color:#111}
+.printTitle{font-size:20px;font-weight:900;margin:0 0 10px}
+.printSub{margin:0 0 10px; color:#333}
+.printBox{border:1px solid #ddd; border-radius:12px; padding:12px}
+.printTable{width:100%; border-collapse:collapse}
+.printTable th,.printTable td{border-bottom:1px solid #eee; padding:8px; font-size:12px; text-align:right}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo"><img data-company-logo style="display:none"/></div>
+      <div class="txt">
+        <b data-company-name>نظام الدوام والرواتب</b>
+        <span>لوحة المدير • Manager (تسجيل دوام + تقارير قراءة)</span>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="btnMenu">☰</button>
+      <button class="btn red" id="btnLogout">خروج</button>
+    </div>
+  </div>
+
+  <div id="drawerOverlay" class="drawerOverlay"></div>
+  <aside id="drawer" class="drawer" aria-label="القائمة">
+    <div class="brand" style="justify-content:space-between">
+      <div class="txt">
+        <b>القائمة</b>
+        <span>Manager</span>
+      </div>
+      <button class="btn ghost" id="btnCloseDrawer">✕</button>
+    </div>
+    <div class="nav">
+      <button data-nav="attendance" class="active">تسجيل الدوام</button>
+      <button data-nav="payrollread">تقارير الرواتب (قراءة)</button>
+      <button data-nav="export">تصدير CSV للدوام</button>
+    </div>
+    <div class="small">لا يمكن للمدير تعديل الشركة/الأقسام/الموظفين/المدراء/السلف.</div>
+  </aside>
+
+  <div style="height:14px"></div>
+
+  <section data-section="attendance" class="card">
+    <div class="hd">
+      <div>
+        <h2>تسجيل الدوام</h2>
+        <p>دخول/خروج + أعذار + ملاحظة.</p>
+      </div>
+      <span class="tag good">مسموح</span>
+    </div>
+    <div class="bd">
+      <div class="row cols4">
+        <div class="field">
+          <label>الموظف</label>
+          <select id="attEmp"></select>
+        </div>
+        <div class="field">
+          <label>التاريخ</label>
+          <input id="attDate" type="date"/>
+        </div>
+        <div class="field">
+          <label>الدخول</label>
+          <input id="attIn" type="time"/>
+        </div>
+        <div class="field">
+          <label>الخروج</label>
+          <input id="attOut" type="time"/>
+        </div>
+      </div>
+
+      <div class="row cols3" style="margin-top:10px">
+        <div class="field">
+          <label>نوع العذر</label>
+          <select id="excuseType">
+            <option value="none" selected>بدون</option>
+            <option value="late_excused">تأخير بعذر</option>
+            <option value="early_excused">انصراف مبكر بعذر</option>
+            <option value="absent_excused">غياب بعذر</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>مشوار خارج المصنع</label>
+          <select id="outOfFactory">
+            <option value="0" selected>لا</option>
+            <option value="1">نعم</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>ملاحظة</label>
+          <input id="attNote" placeholder="اختياري"/>
+        </div>
+      </div>
+
+      <div class="row cols2" style="margin-top:10px">
+        <button class="btn green" id="saveAttendance">حفظ</button>
+        <button class="btn red" id="deleteAttendance">حذف</button>
+      </div>
+
+      <hr class="sep"/>
+
+      <div class="row cols3">
+        <div class="field">
+          <label>عرض سجلات شهر</label>
+          <input id="attMonthFilter" placeholder="YYYY-MM"/>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button class="btn ghost" id="refreshAttTable">تحديث الجدول</button>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="tableWrap">
+        <table><thead><tr><th>تاريخ</th><th>يوم</th><th>الموظف</th><th>دخول</th><th>خروج</th><th>إض</th><th>تأ</th><th>مب</th><th>ملاحظة</th></tr></thead><tbody id="attTable"></tbody></table>
+      </div>
+    </div>
+  </section>
+
+  <section data-section="payrollread" class="card" style="display:none">
+    <div class="hd">
+      <div>
+        <h2>تقارير الرواتب (قراءة فقط)</h2>
+        <p>عرض المستحقات بدون تعديل سلف أو إعدادات.</p>
+      </div>
+      <span class="tag warn">قراءة</span>
+    </div>
+    <div class="bd">
+      <div class="row cols3">
+        <div class="field">
+          <label>الشهر (YYYY-MM)</label>
+          <input id="payMonth" placeholder="YYYY-MM"/>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button class="btn primary" id="calcPayroll">تحديث</button>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button class="btn ghost" id="exportPayrollCsv">تصدير تقرير رواتب CSV</button>
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+      <div class="tableWrap">
+        <table>
+          <thead><tr>
+            <th>الاسم</th><th>القسم</th><th>الأساسي</th><th>إضافي</th><th>تأخير</th><th>مبكر</th><th>غياب</th><th>سلف</th><th>المستحق</th>
+          </tr></thead>
+          <tbody id="payTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section data-section="export" class="card" style="display:none">
+    <div class="hd">
+      <div>
+        <h2>تصدير CSV للدوام</h2>
+        <p>تصدير دوام شهر محدد.</p>
+      </div>
+    </div>
+    <div class="bd">
+      <div class="row cols3">
+        <div class="field">
+          <label>الشهر (YYYY-MM)</label>
+          <input id="expMonth" placeholder="YYYY-MM"/>
+        </div>
+        <div class="field" style="justify-content:flex-end">
+          <label>&nbsp;</label>
+          <button class="btn primary" id="exportAttendance">تصدير</button>
+        </div>
+      </div>
+      <div class="small">ملاحظة: يعتمد على أسماء الموظفين الحالية.</div>
+    </div>
+  </section>
+</div>
+
+<script>
+const s = requireRole(["manager"]);
+if(!s){ location.href="index.html"; }
+ensureApp();
+setBrandFromCompany();
+
+const dr = drawerInit();
+document.getElementById("btnCloseDrawer").addEventListener("click", ()=>{
+  document.getElementById("drawerOverlay").classList.remove("show");
+  document.getElementById("drawer").classList.remove("show");
+});
+document.querySelectorAll("[data-nav]").forEach(b=>{
+  b.addEventListener("click", ()=>{
+    switchSection(b.getAttribute("data-nav"));
+    document.getElementById("drawerOverlay").classList.remove("show");
+    document.getElementById("drawer").classList.remove("show");
+  });
+});
+restoreLastSection("attendance");
+
+document.getElementById("btnLogout").addEventListener("click", ()=>{
+  sessionClear(); location.href="index.html";
+});
+
+function getEmpNameById(id){
+  const app=ensureApp();
+  const e=(app.employees||[]).find(x=>x.id===id);
+  return e?e.name:"—";
+}
+function deptNameByEmp(emp){
+  const app=ensureApp();
+  const d=(app.departments||[]).find(x=>x.id===emp.departmentId);
+  return d?d.name:"—";
+}
+function fillEmployees(){
+  const app=ensureApp();
+  document.getElementById("attEmp").innerHTML = app.employees.filter(e=>e.active!==false).map(e=>`<option value="${e.id}">${e.name}</option>`).join("");
+}
+fillEmployees();
+
+document.getElementById("attDate").value = nowISODate();
+document.getElementById("attMonthFilter").value = yyyymm();
+
+function loadAttendanceForm(){
+  const empId=document.getElementById("attEmp").value;
+  const date=document.getElementById("attDate").value;
+  if(!empId||!date) return;
+  const app=ensureApp();
+  const rec=(app.attendance?.[date]||{})[empId]||null;
+  document.getElementById("attIn").value=rec?.checkIn||"";
+  document.getElementById("attOut").value=rec?.checkOut||"";
+  document.getElementById("excuseType").value=rec?.excuseType||"none";
+  document.getElementById("outOfFactory").value=rec?.outOfFactory?"1":"0";
+  document.getElementById("attNote").value=rec?.note||"";
+}
+document.getElementById("attEmp").addEventListener("change", loadAttendanceForm);
+document.getElementById("attDate").addEventListener("change", loadAttendanceForm);
+
+document.getElementById("saveAttendance").addEventListener("click", ()=>{
+  const empId=document.getElementById("attEmp").value;
+  const date=document.getElementById("attDate").value;
+  const checkIn=document.getElementById("attIn").value.trim();
+  const checkOut=document.getElementById("attOut").value.trim();
+  const excuseType=document.getElementById("excuseType").value;
+  const outOfFactory=document.getElementById("outOfFactory").value==="1";
+  const note=document.getElementById("attNote").value.trim();
+  if(!empId||!date){ toast("اختر موظف وتاريخ.", "warn"); return; }
+  if(checkIn && parseTimeToMinutes(checkIn)==null){ toast("وقت الدخول غير صحيح.", "bad"); return; }
+  if(checkOut && parseTimeToMinutes(checkOut)==null){ toast("وقت الخروج غير صحيح.", "bad"); return; }
+
+  updateApp(app=>{
+    app.attendance[date]=app.attendance[date]||{};
+    app.attendance[date][empId]={date, employeeId:empId, checkIn:checkIn||"", checkOut:checkOut||"", excuseType, outOfFactory, note};
+  });
+  toast("تم حفظ الدوام.");
+  buildAttendanceTable();
+});
+document.getElementById("deleteAttendance").addEventListener("click", ()=>{
+  const empId=document.getElementById("attEmp").value;
+  const date=document.getElementById("attDate").value;
+  if(!empId||!date) return;
+  if(!confirm("حذف السجل؟")) return;
+  updateApp(app=>{
+    if(app.attendance?.[date]) delete app.attendance[date][empId];
+  });
+  toast("تم الحذف.", "warn");
+  loadAttendanceForm();
+  buildAttendanceTable();
+});
+
+
+function buildAttendanceTable(){
+  const app = ensureApp();
+  const ym = (document.getElementById("attMonthFilter")?.value || yyyymm()).trim();
+  const settings = (app.monthSettings||{})[ym] || (app.monthSettings||{})[yyyymm()] || {};
+  const advMap = null;
+
+  const rows = [];
+  for(const dateKey of Object.keys(app.attendance||{})){
+    if(ym && !dateKey.startsWith(ym+"-")) continue;
+    const day = app.attendance[dateKey] || {};
+    for(const empId of Object.keys(day)){
+      const rec = day[empId] || {};
+      const empName = getEmployeeById(empId)?.name || "—";
+      rows.push({date:dateKey, empId, empName, ...rec});
+    }
+  }
+  rows.sort((a,b)=> (a.date+a.empName).localeCompare(b.date+b.empName));
+
+  const tb=document.getElementById("attTable");
+  if(!tb) return;
+  tb.innerHTML="";
+
+  for(const r of rows){
+    const m = computeDayMetrics(settings, r);
+    let advLabel = "";
+    if(advMap){
+      const adv = advMap[r.empId];
+      if(adv && Number(adv.amount||0)) advLabel = `${fmtMoney(adv.amount)}${adv.date?` (${adv.date})`:""}`;
+    }
+    const tr=document.createElement("tr");
+    tr.innerHTML = `<td>${r.date}</td><td>${dayNameAr(r.date)}</td><td>${r.empName}</td><td>${r.checkIn||"—"}</td><td>${r.checkOut||"—"}</td><td>${fmtHoursFromMinutes(m.overtimeMinutes)}</td><td>${fmtHoursFromMinutes(m.lateMinutes)}</td><td>${fmtHoursFromMinutes(m.earlyLeaveMinutes)}</td><td>${r.note||""}</td>`;
+    tb.appendChild(tr);
+  }
+
+  if(rows.length===0){
+    const tr=document.createElement("tr");
+    tr.innerHTML = `<td colspan="9" style="text-align:center;color:var(--muted)">لا توجد سجلات</td>`;
+    tb.appendChild(tr);
+  }
+}
+
+
+document.getElementById("refreshAttTable").addEventListener("click", buildAttendanceTable);
+buildAttendanceTable();
+
+/* Payroll read */
+document.getElementById("payMonth").value = yyyymm();
+function buildPayrollRead(){
+  const ym=document.getElementById("payMonth").value.trim();
+  if(!/^\d{4}-\d{2}$/.test(ym)){ toast("صيغة الشهر غير صحيحة.", "warn"); return; }
+  const app=ensureApp();
+  const deptById = Object.fromEntries(app.departments.map(d=>[d.id,d.name]));
+  const tb=document.getElementById("payTable");
+  tb.innerHTML="";
+  for(const emp of app.employees){
+    const p=computePayrollForEmployee(app, emp, ym).totals;
+    const tr=document.createElement("tr");
+    tr.innerHTML = `<td>${emp.name}</td><td>${deptById[emp.departmentId]||"—"}</td>
+      <td>${fmtMoney(p.baseSalary)}</td><td>${fmtMoney(p.overtimeValue)}</td><td>${fmtMoney(p.lateDeduction)}</td>
+      <td>${fmtMoney(p.earlyDeduction)}</td><td>${fmtMoney(p.absenceNoExcuseDeduction)}</td><td>${fmtMoney(p.advances)}</td><td><b>${fmtMoney(p.net)}</b></td>`;
+    tb.appendChild(tr);
+  }
+}
+document.getElementById("calcPayroll").addEventListener("click", buildPayrollRead);
+
+document.getElementById("exportPayrollCsv").addEventListener("click", ()=>{
+  const ym=document.getElementById("payMonth").value.trim();
+  if(!/^\d{4}-\d{2}$/.test(ym)){ toast("صيغة الشهر غير صحيحة.", "warn"); return; }
+  const app=ensureApp();
+  const deptById = Object.fromEntries(app.departments.map(d=>[d.id,d.name]));
+  const rows=[["الاسم","القسم","الراتب الأساسي","قيمة الإضافي","خصم التأخير","خصم المبكر","خصم الغياب","السلف","المستحق"]];
+  for(const emp of app.employees){
+    const p=computePayrollForEmployee(app, emp, ym).totals;
+    rows.push([emp.name, deptById[emp.departmentId]||"", p.baseSalary, p.overtimeValue, p.lateDeduction, p.earlyDeduction, p.absenceNoExcuseDeduction, p.advances, p.net]);
+  }
+  downloadText(`payroll_${ym}.csv`, csvStringify(rows), "text/csv;charset=utf-8");
+});
+buildPayrollRead();
+
+/* Export attendance */
+document.getElementById("expMonth").value = yyyymm();
+document.getElementById("exportAttendance").addEventListener("click", ()=>{
+  const ym=document.getElementById("expMonth").value.trim();
+  if(!/^\d{4}-\d{2}$/.test(ym)){ toast("صيغة الشهر غير صحيحة.", "warn"); return; }
+  const app=ensureApp();
+  const rows=[["التاريخ","اسم الموظف","الدخول","الخروج","نوع العذر","مشوار خارج المصنع","ملاحظة"]];
+  for(const dateKey of Object.keys(app.attendance||{})){
+    if(!dateKey.startsWith(ym+"-")) continue;
+    const day=app.attendance[dateKey]||{};
+    for(const empId of Object.keys(day)){
+      const rec=day[empId];
+      rows.push([dateKey, getEmpNameById(empId), rec.checkIn||"", rec.checkOut||"", rec.excuseType||"none", rec.outOfFactory?"1":"0", rec.note||""]);
+    }
+  }
+  downloadText(`attendance_${ym}.csv`, csvStringify(rows), "text/csv;charset=utf-8");
+});
+</script>
+
+<div id="toast" class="toast" role="status" aria-live="polite">
+  <div class="dot"></div>
+  <div class="msg"></div>
+</div>
+<script>
+/* ====== Payroll App (Static / LocalStorage) ====== */
+const APP_KEY = "payrollApp_v1";
+
+function deepClone(v){ return JSON.parse(JSON.stringify(v)); }
+function uid(prefix="id"){ return `${prefix}_${Math.random().toString(16).slice(2)}_${Date.now().toString(16)}`; }
+function toast(msg, type="ok"){
+  const el = document.getElementById("toast");
+  if(!el) return;
+  const dot = el.querySelector(".dot");
+  dot.style.background = type==="bad" ? "var(--red)" : (type==="warn" ? "var(--amber)" : "var(--green)");
+  el.querySelector(".msg").textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toast._t);
+  toast._t = setTimeout(()=>el.classList.remove("show"), 2600);
+}
+function fmtMoney(n){
+  n = Number(n);
+  if(!isFinite(n)) n = 0;
+  return (Math.round(n*100)/100).toLocaleString('ar-EG', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function fmtHoursFromMinutes(min){ const h=(Number(min||0)/60); return (Math.round(h*100)/100).toFixed(2); }
+function nowISODate(){
+  const d=new Date();
+  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0'), dd=String(d.getDate()).padStart(2,'0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+function dayNameAr(dateISO){ const d=new Date(dateISO+"T00:00:00"); const days=["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"]; return days[d.getDay()]||"—"; }
+function yyyymm(d=new Date()){
+  const yyyy=d.getFullYear(), mm=String(d.getMonth()+1).padStart(2,'0');
+  return `${yyyy}-${mm}`;
+}
+function prevYYYYMM(ym){
+  const [y,m]=ym.split('-').map(Number);
+  const d=new Date(y, m-1, 1);
+  d.setMonth(d.getMonth()-1);
+  return yyyymm(d);
+}
+function parseTimeToMinutes(hhmm){
+  if(!hhmm) return null;
+  const m=/^(\d{1,2}):(\d{2})$/.exec(String(hhmm).trim());
+  if(!m) return null;
+  const h=Number(m[1]), mi=Number(m[2]);
+  if(h<0||h>23||mi<0||mi>59) return null;
+  return h*60+mi;
+}
+function minutesToHHMM(min){
+  min = Math.max(0, Math.floor(min));
+  const h=Math.floor(min/60), m=min%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+function clamp(n,a,b){ return Math.max(a, Math.min(b,n)); }
+
+function getApp(){
+  try{
+    const raw = localStorage.getItem(APP_KEY);
+    if(!raw) return null;
+    return JSON.parse(raw);
+  }catch(e){ return null; }
+}
+function setApp(obj){ localStorage.setItem(APP_KEY, JSON.stringify(obj)); }
+function ensureApp(){
+  let app = getApp();
+  const ym = yyyymm();
+  if(!app){
+    app = {
+      company:{ companyName:"", companyLogo:"" },
+      departments:[],
+      employees:[],
+      managers:[{ id: uid("mgr"), username:"manager", password:"manager123" }],
+      monthSettings:{},
+      attendance:{},
+      advances:{}
+    };
+  }
+  if(!Array.isArray(app.managers) || !app.managers.find(m=>m.username==="manager")){
+    app.managers = Array.isArray(app.managers) ? app.managers : [];
+    app.managers.push({ id: uid("mgr"), username:"manager", password:"manager123" });
+  }
+  if(!app.monthSettings) app.monthSettings = {};
+  if(!app.monthSettings[ym]){
+    const d=new Date();
+    const daysInMonth = new Date(d.getFullYear(), d.getMonth()+1, 0).getDate();
+    app.monthSettings[ym] = {
+      daysInMonth,
+      workHoursInMonth: 176,
+      shiftStart:"09:00",
+      shiftEnd:"17:00",
+      lateGraceMinutes: 10,
+      earlyLeaveGraceMinutes: 10,
+      latePenaltyMultiplier: 1.5,
+      earlyPenaltyMultiplier: 1.5,
+      overtimeMultiplier: 1.5
+    };
+  }
+  if(!app.attendance) app.attendance = {};
+  if(!app.advances) app.advances = {};
+  // migrate: advances date
+  for(const ymKey of Object.keys(app.advances||{})){
+    const m=app.advances[ymKey]||{};
+    for(const empId of Object.keys(m)){
+      const rec=m[empId]||{};
+      if(rec && typeof rec==="object" && !("date" in rec)) rec.date = nowISODate();
+    }
+  }
+  if(!app.departments) app.departments = [];
+  if(!app.employees) app.employees = [];
+  if(!app.company) app.company = { companyName:"", companyLogo:"" };
+  setApp(app);
+  return app;
+}
+function updateApp(mutator){
+  const app = ensureApp();
+  const draft = deepClone(app);
+  mutator(draft);
+  setApp(draft);
+  return draft;
+}
+
+function sessionSet(obj){ sessionStorage.setItem(`${APP_KEY}:session`, JSON.stringify(obj)); }
+function sessionGet(){ try{ return JSON.parse(sessionStorage.getItem(`${APP_KEY}:session`)||"null"); }catch(e){ return null; } }
+function sessionClear(){ sessionStorage.removeItem(`${APP_KEY}:session`); }
+
+function requireRole(roles){
+  const s = sessionGet();
+  if(!s || !roles.includes(s.role)) return null;
+  return s;
+}
+
+function csvParse(text){
+  const rows = [];
+  const lines = String(text||"").replace(/\r/g,"").split("\n").filter(l=>l.trim().length);
+  if(!lines.length) return rows;
+  const sep = (lines[0].includes(";") && !lines[0].includes(",")) ? ";" : ",";
+  for(const line of lines){
+    const out=[];
+    let cur="", inQ=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(ch === '"'){
+        if(inQ && line[i+1] === '"'){ cur+='"'; i++; }
+        else inQ = !inQ;
+      }else if(ch===sep && !inQ){
+        out.push(cur.trim()); cur="";
+      }else cur+=ch;
+    }
+    out.push(cur.trim());
+    rows.push(out);
+  }
+  return rows;
+}
+function csvStringify(rows){
+  return rows.map(r => r.map(v=>{
+    const s=String(v??"");
+    if(/[",\n;]/.test(s)) return `"${s.replace(/"/g,'""')}"`;
+    return s;
+  }).join(",")).join("\n");
+}
+function downloadText(filename, text, mime="text/plain;charset=utf-8"){
+  const blob=new Blob([text],{type:mime});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download=filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 2000);
+}
+function downloadJSON(filename, obj){ downloadText(filename, JSON.stringify(obj,null,2), "application/json;charset=utf-8"); }
+
+async function readFileText(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>res(String(fr.result||""));
+    fr.onerror=()=>rej(fr.error||new Error("FileReader error"));
+    fr.readAsText(file,"utf-8");
+  });
+}
+
+/* ====== Payroll Logic ====== */
+function computeDayMetrics(settings, rec){
+  // returns {lateMinutes, earlyLeaveMinutes, overtimeMinutes, absent}
+  const s=settings;
+  const start = parseTimeToMinutes(s.shiftStart);
+  const end = parseTimeToMinutes(s.shiftEnd);
+  const checkIn = parseTimeToMinutes(rec.checkIn);
+  const checkOut = parseTimeToMinutes(rec.checkOut);
+
+  const excuse = rec.excuseType || "none";
+  const hasTimes = (checkIn!=null && checkOut!=null);
+
+  let late=0, early=0, ot=0, absent=false;
+
+  if(!hasTimes){
+    // no in/out -> absent
+    absent=true;
+  }else{
+    if(checkIn>start){
+      late = Math.max(0, checkIn - start - Number(s.lateGraceMinutes||0));
+    }
+    if(checkOut<end){
+      early = Math.max(0, end - checkOut - Number(s.earlyLeaveGraceMinutes||0));
+    }
+    if(checkOut>end){
+      ot = Math.max(0, checkOut - end);
+    }
+  }
+
+  if(excuse==="late_excused") late=0;
+  if(excuse==="early_excused") early=0;
+  if(excuse==="absent_excused"){ absent=true; late=0; early=0; ot=0; }
+
+  return { lateMinutes:late, earlyLeaveMinutes:early, overtimeMinutes:ot, absent };
+}
+
+function computePayrollForEmployee(app, emp, ym){
+  const settings = app.monthSettings[ym] || app.monthSettings[yyyymm()] || {};
+  const workHoursInMonth = Number(settings.workHoursInMonth||176);
+  const hourValue = (Number(emp.monthlySalary||0) / (workHoursInMonth || 1));
+
+  // advances
+  const adv = (((app.advances||{})[ym]||{})[emp.id]||{});
+  const advances = Number(adv.amount||0);
+
+  // attendance records for month
+  let lateMin=0, earlyMin=0, otMin=0;
+  let absentExcusedDays=0, absentNoExcuseDays=0;
+  const rows = [];
+
+  for(const dateKey of Object.keys(app.attendance||{})){
+    if(!dateKey.startsWith(ym+"-")) continue;
+    const day = app.attendance[dateKey] || {};
+    const rec = day[emp.id];
+    if(!rec) continue;
+
+    const m = computeDayMetrics(settings, rec);
+    lateMin += m.lateMinutes;
+    earlyMin += m.earlyLeaveMinutes;
+    otMin += m.overtimeMinutes;
+
+    if(m.absent){
+      if((rec.excuseType||"none")==="absent_excused") absentExcusedDays += 1;
+      else if(!rec.checkIn && !rec.checkOut) absentNoExcuseDays += 1;
+    }
+
+    rows.push({
+      date: dateKey,
+      checkIn: rec.checkIn || "",
+      checkOut: rec.checkOut || "",
+      excuseType: rec.excuseType || "none",
+      outOfFactory: !!rec.outOfFactory,
+      note: rec.note || "",
+      ...m
+    });
+  }
+
+  // Deduction & additions
+  const lateDeduction = (lateMin/60) * hourValue * Number(settings.latePenaltyMultiplier||1.5);
+  const earlyDeduction = (earlyMin/60) * hourValue * Number(settings.earlyPenaltyMultiplier||1.5);
+  const otValue = (otMin/60) * hourValue * Number(settings.overtimeMultiplier||1.5);
+
+  // absent without excuse -> deduct full day based on salary/daysInMonth, multiplier
+  const daysInMonth = Number(settings.daysInMonth||30);
+  const dayValue = (Number(emp.monthlySalary||0) / (daysInMonth || 1));
+  const absenceNoExcuseFactor = Number((settings.absenceNoExcuseFactor ?? 1.0));
+  const absenceNoExcuseDeduction = absentNoExcuseDays * dayValue * absenceNoExcuseFactor;
+
+  const base = Number(emp.monthlySalary||0);
+
+  // if employee has no attendance at all in month => net=0 (as requested in spec)
+  const hasAny = rows.length > 0;
+  let net = base + otValue - lateDeduction - earlyDeduction - absenceNoExcuseDeduction - advances;
+  if(!hasAny) net = 0;
+
+  return {
+    ym,
+    hourValue,
+    baseSalary: base,
+    totals:{
+      lateMinutes: lateMin,
+      earlyLeaveMinutes: earlyMin,
+      overtimeMinutes: otMin,
+      absentExcusedDays,
+      absentNoExcuseDays,
+      advances,
+      lateDeduction,
+      earlyDeduction,
+      overtimeValue: otValue,
+      absenceNoExcuseDeduction,
+      net
+    },
+    rows: rows.sort((a,b)=>a.date.localeCompare(b.date))
+  };
+}
+
+/* ====== Printing (Receipt PDF via Print) ====== */
+function openReceiptPrintWindow(app, emp, ym){
+  const dept = (app.departments||[]).find(d=>d.id===emp.departmentId);
+  const payroll = computePayrollForEmployee(app, emp, ym);
+    const advRec = (((app.advances||{})[ym]||{})[emp.id]||{});
+  const advLabel = (advRec && Number(advRec.amount||0)) ? `${fmtMoney(advRec.amount)}${advRec.date?` (${advRec.date})`:""}` : "";
+const companyName = (app.company?.companyName || "").trim() || "—";
+  const logo = app.company?.companyLogo || "";
+
+  const rowsHtml = payroll.rows.map(r=>{
+    const exMap = {
+      none:"بدون",
+      late_excused:"تأخير بعذر",
+      early_excused:"انصراف مبكر بعذر",
+      absent_excused:"غياب بعذر"
+    };
+    const advCell = (idx===0 && advLabel) ? advLabel : "";
+    return `<tr><td>${r.date}</td>
+      <td>${r.checkIn||"—"}</td>
+      <td>${r.checkOut||"—"}</td>
+      <td>${exMap[r.excuseType]||"بدون"}</td>
+      <td>${r.outOfFactory?"نعم":"لا"}</td>
+      <td>${(r.note||"").replace(/</g,"&lt;")}</td>
+    </tr>`;
+  }).join("");
+
+  const html = `<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>صك قبض - ${emp.name}</title>
+  <style>
+    body{font-family: ui-sans-serif, system-ui, "Noto Kufi Arabic","Noto Sans Arabic", Tahoma, Arial; background:#fff; color:#111; margin:0; padding:18px}
+    .row{display:flex; gap:14px; align-items:center; justify-content:space-between; flex-wrap:wrap}
+    .box{border:1px solid #e6e6e6; border-radius:14px; padding:14px}
+    .logo{width:54px;height:54px;border-radius:14px; overflow:hidden; border:1px solid #eee; display:grid; place-items:center}
+    .logo img{width:100%;height:100%;object-fit:cover}
+    h1{margin:0; font-size:20px}
+    p{margin:6px 0 0; color:#333; font-size:12px}
+    table{width:100%; border-collapse:collapse; margin-top:10px}
+    th,td{border-bottom:1px solid #eee; padding:8px; font-size:12px; text-align:right}
+    th{background:#fafafa}
+    .k{color:#666; font-size:12px}
+    .v{font-weight:800}
+    .sig{display:flex; gap:14px; margin-top:16px}
+    .sig .s{flex:1; border-top:1px dashed #bbb; padding-top:10px; text-align:center; color:#333}
+    @media print{ body{padding:0} .noPrint{display:none} }
+  </style>
+  </head><body>
+    <div class="noPrint" style="margin-bottom:10px">
+      <button onclick="window.print()" style="padding:10px 12px; border-radius:12px; border:1px solid #ddd; background:#0b1220; color:#fff; font-weight:800; cursor:pointer">طباعة / حفظ PDF</button>
+    </div>
+
+    <div class="box">
+      <div class="row">
+        <div class="row" style="gap:10px">
+          <div class="logo">${logo ? `<img src="${logo}"/>` : `<span style="font-weight:900;color:#0b1220">🏢</span>`}</div>
+          <div>
+            <h1>صك قبض راتب</h1>
+            <p>${companyName}</p>
+          </div>
+        </div>
+        <div style="text-align:left">
+          <div class="k">الشهر</div>
+          <div class="v">${ym}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:12px" class="row">
+        <div><span class="k">الموظف:</span> <span class="v">${emp.name}</span></div>
+        <div><span class="k">القسم:</span> <span class="v">${dept?dept.name:"—"}</span></div>
+        <div><span class="k">الراتب الأساسي:</span> <span class="v">${fmtMoney(payroll.totals.baseSalary)}</span></div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>تاريخ</th><th>يوم</th><th>دخول</th><th>خروج</th><th>إض</th><th>تأ</th><th>مب</th><th>سلف</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rowsHtml || `<tr><td colspan="6" style="text-align:center;color:#666">لا توجد سجلات لهذا الشهر</td></tr>`}
+        </tbody>
+      </table>
+
+      <div class="row" style="margin-top:12px">
+        <div><span class="k">إضافي (دقائق):</span> <span class="v">${payroll.totals.overtimeMinutes}</span></div>
+        <div><span class="k">قيمة الإضافي:</span> <span class="v">${fmtMoney(payroll.totals.overtimeValue)}</span></div>
+        <div><span class="k">تأخير (دقائق):</span> <span class="v">${payroll.totals.lateMinutes}</span></div>
+        <div><span class="k">خصم التأخير:</span> <span class="v">${fmtMoney(payroll.totals.lateDeduction)}</span></div>
+        <div><span class="k">مبكر (دقائق):</span> <span class="v">${payroll.totals.earlyLeaveMinutes}</span></div>
+        <div><span class="k">خصم المبكر:</span> <span class="v">${fmtMoney(payroll.totals.earlyDeduction)}</span></div>
+        <div><span class="k">غياب بدون عذر (أيام):</span> <span class="v">${payroll.totals.absentNoExcuseDays}</span></div>
+        <div><span class="k">خصم الغياب:</span> <span class="v">${fmtMoney(payroll.totals.absenceNoExcuseDeduction)}</span></div>
+        <div><span class="k">السلف:</span> <span class="v">${fmtMoney(payroll.totals.advances)}</span></div>
+        <div style="flex:1"></div>
+        <div style="min-width:220px"><span class="k">المستحق النهائي:</span> <span class="v" style="font-size:16px">${fmtMoney(payroll.totals.net)}</span></div>
+      </div>
+
+      <div class="sig">
+        <div class="s">توقيع الموظف</div>
+        <div class="s">توقيع الإدارة</div>
+      </div>
+    </div>
+  </body></html>`;
+
+  const w = window.open("", "_blank");
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+}
+
+/* ====== UI helpers ====== */
+function setBrandFromCompany(){
+  const app = ensureApp();
+  const name = (app.company?.companyName||"").trim() || "نظام الدوام والرواتب";
+  const elName = document.querySelector("[data-company-name]");
+  if(elName) elName.textContent = name;
+  const img = document.querySelector("[data-company-logo]");
+  if(img){
+    if(app.company?.companyLogo){
+      img.src = app.company.companyLogo;
+      img.style.display="block";
+    }else{
+      img.removeAttribute("src");
+      img.style.display="none";
+    }
+  }
+}
+function drawerInit(){
+  const overlay = document.getElementById("drawerOverlay");
+  const drawer = document.getElementById("drawer");
+  const btn = document.getElementById("btnMenu");
+  function close(){ overlay?.classList.remove("show"); drawer?.classList.remove("show"); }
+  function open(){ overlay?.classList.add("show"); drawer?.classList.add("show"); }
+  btn?.addEventListener("click", open);
+  overlay?.addEventListener("click", close);
+  document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") close(); });
+  return {open,close};
+}
+function switchSection(id){
+  document.querySelectorAll("[data-section]").forEach(el=>el.style.display="none");
+  const target = document.querySelector(`[data-section="${id}"]`);
+  if(target) target.style.display="block";
+  document.querySelectorAll("[data-nav]").forEach(b=>{
+    b.classList.toggle("active", b.getAttribute("data-nav")===id);
+  });
+  sessionStorage.setItem(`${APP_KEY}:lastSection`, id);
+}
+function restoreLastSection(defaultId){
+  const id = sessionStorage.getItem(`${APP_KEY}:lastSection`) || defaultId;
+  switchSection(id);
+}
+
+</script>
+</body>
+</html>
