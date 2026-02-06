@@ -1,0 +1,5 @@
+/* إضافات بسيطة فوق Tailwind */
+html, body { height: 100%; }
+body { background: #f6f7fb; }
+.card { border-radius: 18px; box-shadow: 0 10px 30px rgba(16,24,40,.08); }
+.btn { border-radius: 14px; }

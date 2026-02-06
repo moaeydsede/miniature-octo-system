@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>لوحة المدير</title>
+  <base href="./">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./assets/app.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.3/dist/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="min-h-screen">
+<div id="toast" style="display:none"></div>
+<div class="max-w-6xl mx-auto px-3 sm:px-6 py-4">
+  <div class="bg-white card p-4 sm:p-6">
+    <div id="topbar"></div>
+    <div class="mt-4">
+      <div class="flex flex-wrap gap-2">
+        <button data-tab="dashboard" class="tab px-4 py-2 rounded-2xl bg-slate-900 text-white text-sm font-semibold">الرئيسية</button>
+        <button data-tab="company" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">بيانات الشركة</button>
+        <button data-tab="departments" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">الأقسام</button>
+        <button data-tab="employees" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">الموظفين</button>
+        <button data-tab="attendance" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">تسجيل الدوام</button>
+        <button data-tab="settings" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">إعدادات الشهر</button>
+        <button data-tab="payroll" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">الرواتب</button>
+        <button data-tab="sync" class="tab px-4 py-2 rounded-2xl bg-slate-100 text-slate-800 text-sm font-semibold">مزامنة / Excel</button>
+        
+      </div>
+    </div>
+  </div>
+
+  <div id="view" class="mt-4"></div>
+</div>
+
+<script src="./assets/utils.js"></script>
+<script src="./assets/ui.js"></script>
+<script src="./assets/admin_app.js"></script>
+</body>
+</html>
