@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>نظام الدوام والرواتب</title>
+  <base href="./">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="./assets/app.css"/>
+</head>
+<body class="min-h-screen">
+<div id="toast" style="display:none"></div>
+
+<div class="max-w-md mx-auto px-4 py-10">
+  <div class="bg-white card p-6">
+    <div class="text-center">
+      <div class="text-2xl font-extrabold text-slate-900">نظام الدوام والرواتب</div>
+      <div class="text-sm text-slate-500 mt-2">واجهة عربية احترافية — تعمل على GitHub Pages</div>
+    </div>
+
+    <div class="mt-6 grid gap-3">
+      <button id="tabAdmin" class="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold">دخول الإدارة / المدير</button>
+      <button id="tabEmp" class="w-full px-4 py-3 rounded-2xl bg-slate-100 text-slate-800 font-semibold">دخول الموظف (عرض فقط)</button>
+    </div>
+
+    <div id="panelAdmin" class="mt-6">
+      <div class="grid gap-3">
+        <div>
+          <label class="text-sm text-slate-600">نوع الدخول</label>
+          <select id="adminType" class="mt-1 w-full border border-slate-200 rounded-2xl px-3 py-3 bg-white">
+            <option value="ADMIN">Admin</option>
+            <option value="MANAGER">Manager</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">اسم المستخدم</label>
+          <input id="adminUser" class="mt-1 w-full border border-slate-200 rounded-2xl px-3 py-3" placeholder="admin أو مدير"/>
+        </div>
+        <div>
+          <label class="text-sm text-slate-600">كلمة السر</label>
+          <input id="adminPass" type="password" class="mt-1 w-full border border-slate-200 rounded-2xl px-3 py-3" placeholder="••••••"/>
+        </div>
+        <button id="btnAdminLogin" class="w-full px-4 py-3 rounded-2xl bg-emerald-600 text-white font-semibold">دخول</button>
+        <div class="text-xs text-slate-500">
+          Admin ثابت: <b>admin</b> / <b>admin123</b>
+        </div>
+      </div>
+    </div>
+
+    <div id="panelEmp" class="mt-6 hidden">
+      <div class="grid gap-3">
+        <div>
+          <label class="text-sm text-slate-600">اسم الموظف</label>
+          <input id="empName" class="mt-1 w-full border border-slate-200 rounded-2xl px-3 py-3" placeholder="اكتب اسمك كما هو مسجل"/>
+        </div>
+        <button id="btnEmpLogin" class="w-full px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold">دخول</button>
+        <div class="text-xs text-slate-500">
+          الموظف يرى الشهر الحالي + شهر سابق فقط.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="mt-4 text-center text-xs text-slate-500">
+    ملاحظة: بدون سيرفر، المزامنة بين أجهزة مختلفة تتم عبر (تصدير/استيراد ملف مزامنة) من لوحة الإدارة.
+  </div>
+</div>
+
+
+<script>
+  // رسالة مساعدة عند وجود خطأ جافاسكربت يمنع عمل الدخول
+  window.addEventListener("error", function(){
+    const t=document.getElementById("toast");
+    if(t){ t.style.display="block"; t.className="fixed top-4 right-4 z-50 px-4 py-3 text-sm rounded-2xl shadow-lg bg-rose-600 text-white";
+      t.textContent="حدث خطأ منع تشغيل صفحة الدخول. افتح الصفحة في Chrome أو حدّث المتصفح. إن استمر، أرسل لي صورة من Console.";}
+  });
+</script>
+
+<script src="./assets/utils.js"></script>
+<script>
+  // init state
+  loadState();
+
+  const tabAdmin = document.getElementById("tabAdmin");
+  const tabEmp = document.getElementById("tabEmp");
+  const panelAdmin = document.getElementById("panelAdmin");
+  const panelEmp = document.getElementById("panelEmp");
+
+  tabAdmin.onclick = () => {
+    tabAdmin.className = "w-full px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold";
+    tabEmp.className = "w-full px-4 py-3 rounded-2xl bg-slate-100 text-slate-800 font-semibold";
+    panelAdmin.classList.remove("hidden");
+    panelEmp.classList.add("hidden");
+  };
+  tabEmp.onclick = () => {
+    tabEmp.className = "w-full px-4 py-3 rounded-2xl bg-slate-900 text-white font-semibold";
+    tabAdmin.className = "w-full px-4 py-3 rounded-2xl bg-slate-100 text-slate-800 font-semibold";
+    panelEmp.classList.remove("hidden");
+    panelAdmin.classList.add("hidden");
+  };
+
+  document.getElementById("btnAdminLogin").onclick = () => {
+    const st = loadState();
+    const type = document.getElementById("adminType").value;
+    const u = document.getElementById("adminUser").value.trim();
+    const p = document.getElementById("adminPass").value;
+
+    if(type==="ADMIN"){
+      if(u===st.auth.admin.username && p===st.auth.admin.password){
+        setSession({ role:"ADMIN", username:u });
+        location.href="./admin.html";
+      } else {
+        toast("بيانات Admin غير صحيحة", false);
+      }
+    } else {
+      const m = (st.auth.managers||[]).find(x=>x.username===u && x.password===p);
+      if(m){
+        setSession({ role:"MANAGER", username:u, name: m.name || "مدير" });
+        location.href="./manager.html";
+      } else {
+        toast("بيانات المدير غير صحيحة", false);
+      }
+    }
+  };
+
+  document.getElementById("btnEmpLogin").onclick = () => {
+    const st = loadState();
+    const name = document.getElementById("empName").value.trim();
+    const emp = st.employees.find(e=>e.active!==false && e.name===name);
+    if(!emp){ toast("الاسم غير موجود. اطلب من الإدارة إضافتك.", false); return; }
+    setSession({ role:"EMPLOYEE", employeeId: emp.id, employeeName: emp.name });
+    location.href="./employee.html";
+  };
+</script>
+</body>
+</html>
