@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بوابة الموظف</title>
+  <link rel="stylesheet" href="./assets/app.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" id="brandLogo"><span style="font-weight:900">₪</span></div>
+        <div class="title">
+          <b id="brandName">نظام الدوام والرواتب</b>
+          <span id="brandSub">بوابة الموظف</span>
+        </div>
+      </div>
+      <div class="actions noprint" id="topActions"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+  <div class="card-h"><h2>بوابة الموظف</h2><span class="badge">عرض فقط</span></div>
+  <div class="card-b">
+    <div class="row cols-2">
+      <div><label>اختيار الشهر</label><select id="empYm"></select></div>
+      <div style="display:flex;align-items:end;gap:10px"><button class="btn green" id="refreshBtn">تحديث</button><button class="btn blue" id="slipBtn">طباعة/حفظ PDF</button></div>
+    </div>
+    <div class="hr"></div>
+    <div class="tablewrap"><table><thead><tr>
+      <th>التاريخ</th><th>اليوم</th><th>الدخول</th><th>الخروج</th><th>الإضافي</th><th>التأخير</th><th>الانصراف</th><th>ملاحظة</th>
+    </tr></thead><tbody id="daysTbody"></tbody></table></div>
+    <div class="hr"></div>
+    <div class="kpis" id="kpis"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  const A=window.PayrollApp;
+  const s=A.getSession();
+  if(!s || s.role!=="employee"){ location.replace("./index.html"); return; }
+  document.getElementById("topActions").innerHTML = '<span class="badge">Employee</span><button class="btn" id="logoutBtn">خروج</button>';
+  document.getElementById("logoutBtn").addEventListener("click", ()=>{ A.clearSession(); location.href="./index.html"; });
+
+  let data=A.load();
+  const emp=data.employees.find(e=>e.id===s.employeeId);
+  if(!emp){ A.toast("خطأ","الموظف غير موجود."); A.clearSession(); setTimeout(()=>location.replace("./index.html"),700); return; }
+
+  const brandName=document.getElementById("brandName");
+  const brandLogo=document.getElementById("brandLogo");
+  if(data.company.companyName) brandName.textContent=data.company.companyName;
+  if(data.company.companyLogo) brandLogo.innerHTML='<img alt="logo" src="'+data.company.companyLogo+'">';
+
+  const now=new Date();
+  const cur=A.ym(now);
+  const prev=new Date(now.getFullYear(), now.getMonth()-1, 1);
+  const prevYm=A.ym(prev);
+  const sel=document.getElementById("empYm");
+  sel.innerHTML = '<option value="'+cur+'">'+cur+' (الحالي)</option><option value="'+prevYm+'">'+prevYm+' (سابق)</option>';
+
+  function weekdayName(dateStr){
+    const d=new Date(dateStr+"T00:00:00");
+    return ["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"][d.getDay()];
+  }
+
+  function render(){
+    data=A.load();
+    const ymKey=sel.value;
+    const ms=A.ensureMonthSettings(data, ymKey);
+    const days=ms.daysInMonth||30;
+    const pay=A.computePayrollForMonth(data, ymKey).rows.find(r=>r.employeeId===emp.id);
+    const tb=document.getElementById("daysTbody");
+    tb.innerHTML="";
+    let shown=0;
+    for(let day=1; day<=days; day++){
+      const dateStr=ymKey+"-"+A.pad2(day);
+      const rec=(data.attendance[dateStr]||{})[emp.id];
+      if(!rec) continue;
+      shown++;
+      const m=A.calcDayMetrics(ms,rec);
+      const tr=document.createElement("tr");
+      tr.innerHTML='<td>'+dateStr+'</td><td>'+weekdayName(dateStr)+'</td><td>'+(rec.checkIn||"")+'</td><td>'+(rec.checkOut||"")+'</td><td>'+A.minutesToHM(m.overtimeMinutes)+'</td><td>'+A.minutesToHM(m.lateMinutes)+'</td><td>'+A.minutesToHM(m.earlyLeaveMinutes)+'</td><td>'+((rec.outOfFactory?"مشوار خارج المصنع. ":"")+(rec.note||""))+'</td>';
+      tb.appendChild(tr);
+    }
+    if(!shown){
+      const tr=document.createElement("tr");
+      tr.innerHTML='<td colspan="8" style="color:var(--muted);padding:12px">لا يوجد تسجيلات لعرضها.</td>';
+      tb.appendChild(tr);
+    }
+    document.getElementById("kpis").innerHTML =
+      '<div class="kpi"><span>الراتب</span><b>'+A.money(emp.monthlySalary)+'</b></div>'
+     +'<div class="kpi"><span>الإضافي</span><b>'+A.minutesToHM(pay?.totalOTMinutes||0)+'</b></div>'
+     +'<div class="kpi"><span>خصم التأخير</span><b>'+A.money(pay?.lateDeduction||0)+'</b></div>'
+     +'<div class="kpi"><span>المستحق</span><b>'+A.money(pay?.net||0)+'</b></div>';
+  }
+  document.getElementById("refreshBtn").addEventListener("click", render);
+
+  const modal=document.getElementById("modal");
+  const modalBody=document.getElementById("modalBody");
+  document.getElementById("modalCloseBtn").addEventListener("click", ()=>modal.classList.remove("show"));
+  document.getElementById("modalPrintBtn").addEventListener("click", ()=>{
+    const w=window.open("","_blank");
+    w.document.open();
+    w.document.write('<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pay Slip</title></head><body>'+modalBody.innerHTML+'</body></html>');
+    w.document.close(); w.focus(); w.print();
+  });
+
+  document.getElementById("slipBtn").addEventListener("click", ()=>{
+    const ymKey=sel.value;
+    modalBody.innerHTML=A.buildPaySlipHTML(A.load(), ymKey, emp.id);
+    modal.classList.add("show");
+  });
+
+  render();
+})();
+</script>
+
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="t">—</div>
+    <div class="m">—</div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="box">
+      <div class="box-h">
+        <b id="modalTitle">—</b>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn green" id="modalPrintBtn">طباعة / حفظ PDF</button>
+          <button class="btn" id="modalCloseBtn">إغلاق</button>
+        </div>
+      </div>
+      <div class="box-b" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>

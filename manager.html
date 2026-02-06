@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة المدير</title>
+  <link rel="stylesheet" href="./assets/app.css" />
+</head>
+<body>
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="brand">
+        <div class="logo" id="brandLogo"><span style="font-weight:900">₪</span></div>
+        <div class="title">
+          <b id="brandName">نظام الدوام والرواتب</b>
+          <span id="brandSub">لوحة المدير</span>
+        </div>
+      </div>
+      <div class="actions noprint" id="topActions"></div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="card">
+  <div class="card-h"><h2>لوحة المدير</h2><span class="badge">Attendance + Reports</span></div>
+  <div class="card-b">
+    <div class="pilltabs" id="tabs">
+      <button data-tab="attendance" class="active">تسجيل الدوام</button>
+      <button data-tab="reports">تقارير</button>
+    </div>
+    <div class="hr"></div>
+
+    <section id="tab-attendance">
+      <div class="row cols-3">
+        <div><label>الشهر</label><input id="attYm" type="month" /></div>
+        <div><label>التاريخ</label><input id="attDate" type="date" /></div>
+        <div><label>الموظف</label><select id="attEmp"></select></div>
+      </div>
+      <div class="row cols-3" style="margin-top:10px">
+        <div><label>الدخول</label><input id="attIn" type="time" /></div>
+        <div><label>الخروج</label><input id="attOut" type="time" /></div>
+        <div><label>العذر</label><select id="attExcuse">
+          <option value="none">بدون</option>
+          <option value="late_excused">تأخير بعذر</option>
+          <option value="early_excused">انصراف بعذر</option>
+          <option value="absent_excused">غياب بعذر</option>
+        </select></div>
+      </div>
+      <div class="row cols-2" style="margin-top:10px">
+        <div><label>مشوار خارج المصنع</label><select id="attOutFactory"><option value="false">لا</option><option value="true">نعم</option></select></div>
+        <div><label>ملاحظة</label><input id="attNote" /></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
+        <button class="btn green" id="saveAttBtn">حفظ/تحديث</button>
+        <button class="btn red" id="delAttBtn">حذف</button>
+        <button class="btn" id="calcAttBtn">احتساب</button>
+      </div>
+      <div class="hr"></div>
+      <div class="kpis" id="attKpis"></div>
+    </section>
+
+    <section id="tab-reports" style="display:none">
+      <div class="row cols-3">
+        <div><label>الشهر</label><input id="repYm" type="month" /></div>
+        <div style="display:flex;align-items:end;gap:10px"><button class="btn green" id="refreshRepBtn">تحديث</button><button class="btn blue" id="exportRepBtn">تصدير CSV</button></div>
+        <div class="help">قراءة التقارير فقط.</div>
+      </div>
+      <div class="hr"></div>
+      <div class="tablewrap"><table><thead><tr>
+        <th>الموظف</th><th>القسم</th><th>الراتب</th>
+        <th>إضافي</th><th>قيمته</th>
+        <th>تأخير</th><th>خصمه</th>
+        <th>مبكر</th><th>خصمه</th>
+        <th>السلف</th><th>المستحق</th><th>صك</th>
+      </tr></thead><tbody id="repTbody"></tbody></table></div>
+    </section>
+  </div>
+</div>
+
+<script>
+(function(){
+  const A=window.PayrollApp;
+  const s=A.getSession();
+  if(!s || s.role!=="manager"){ location.replace("./index.html"); return; }
+  document.getElementById("topActions").innerHTML = '<span class="badge">Manager</span><button class="btn" id="logoutBtn">خروج</button>';
+  document.getElementById("logoutBtn").addEventListener("click", ()=>{ A.clearSession(); location.href="./index.html"; });
+
+  let data=A.load();
+  const brandName=document.getElementById("brandName");
+  const brandLogo=document.getElementById("brandLogo");
+  if(data.company.companyName) brandName.textContent=data.company.companyName;
+  if(data.company.companyLogo) brandLogo.innerHTML='<img alt="logo" src="'+data.company.companyLogo+'">';
+
+  function showTab(name){
+    document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("active", b.dataset.tab===name));
+    document.getElementById("tab-attendance").style.display = name==="attendance"?"block":"none";
+    document.getElementById("tab-reports").style.display = name==="reports"?"block":"none";
+    if(name==="attendance"){ fillEmp(); defaults(); renderKpis(); }
+    if(name==="reports"){ repDefaults(); renderReports(); }
+  }
+  document.getElementById("tabs").addEventListener("click",(e)=>{
+    const btn=e.target.closest("button"); if(!btn) return;
+    showTab(btn.dataset.tab);
+  });
+
+  function fillEmp(){
+    data=A.load();
+    document.getElementById("attEmp").innerHTML = data.employees.map(e=>'<option value="'+e.id+'">'+e.name+'</option>').join("");
+  }
+  function defaults(){
+    const now=new Date();
+    document.getElementById("attYm").value=A.ym(now);
+    document.getElementById("attDate").value=A.ymd(now);
+  }
+  function ctx(){return {ymKey:document.getElementById("attYm").value, date:document.getElementById("attDate").value, empId:document.getElementById("attEmp").value};}
+  function loadForm(){
+    data=A.load();
+    const {date,empId}=ctx();
+    const rec=(data.attendance[date]||{})[empId]||null;
+    document.getElementById("attIn").value=rec?.checkIn||"";
+    document.getElementById("attOut").value=rec?.checkOut||"";
+    document.getElementById("attExcuse").value=rec?.excuseType||"none";
+    document.getElementById("attOutFactory").value=String(!!rec?.outOfFactory);
+    document.getElementById("attNote").value=rec?.note||"";
+    renderKpis();
+  }
+  ["attDate","attEmp"].forEach(id=>document.getElementById(id).addEventListener("change", loadForm));
+
+  function renderKpis(){
+    data=A.load();
+    const {ymKey,date,empId}=ctx();
+    if(!ymKey||!date||!empId) return;
+    const ms=A.ensureMonthSettings(data, ymKey);
+    const rec=(data.attendance[date]||{})[empId]||{checkIn:document.getElementById("attIn").value||"",checkOut:document.getElementById("attOut").value||"",excuseType:document.getElementById("attExcuse").value||"none",outOfFactory:document.getElementById("attOutFactory").value==="true",note:document.getElementById("attNote").value||""};
+    const m=A.calcDayMetrics(ms,rec);
+    document.getElementById("attKpis").innerHTML =
+      '<div class="kpi"><span>التأخير</span><b>'+A.minutesToHM(m.lateMinutes)+'</b></div>'
+     +'<div class="kpi"><span>الانصراف</span><b>'+A.minutesToHM(m.earlyLeaveMinutes)+'</b></div>'
+     +'<div class="kpi"><span>الإضافي</span><b>'+A.minutesToHM(m.overtimeMinutes)+'</b></div>'
+     +'<div class="kpi"><span>العذر</span><b>'+(rec.excuseType||"none")+'</b></div>';
+  }
+  document.getElementById("calcAttBtn").addEventListener("click", renderKpis);
+
+  document.getElementById("saveAttBtn").addEventListener("click", ()=>{
+    data=A.load();
+    const {ymKey,date,empId}=ctx();
+    if(!ymKey||!date||!empId) return A.toast("تنبيه","حدد الشهر/التاريخ/الموظف.");
+    A.ensureMonthSettings(data, ymKey);
+    if(!data.attendance[date]) data.attendance[date]={};
+    data.attendance[date][empId]={date,employeeId:empId,checkIn:document.getElementById("attIn").value||"",checkOut:document.getElementById("attOut").value||"",excuseType:document.getElementById("attExcuse").value||"none",outOfFactory:document.getElementById("attOutFactory").value==="true",note:document.getElementById("attNote").value||""};
+    A.save(data); renderKpis(); A.toast("تم","تم حفظ الدوام.");
+  });
+  document.getElementById("delAttBtn").addEventListener("click", ()=>{
+    data=A.load();
+    const {date,empId}=ctx();
+    if(!(data.attendance[date]&&data.attendance[date][empId])) return A.toast("لا يوجد","لا يوجد تسجيل.");
+    if(!confirm("حذف التسجيل؟")) return;
+    delete data.attendance[date][empId];
+    if(Object.keys(data.attendance[date]).length===0) delete data.attendance[date];
+    A.save(data); loadForm(); A.toast("تم","تم الحذف.");
+  });
+
+  // Reports
+  function repDefaults(){
+    const now=new Date();
+    document.getElementById("repYm").value=A.ym(now);
+  }
+  function renderReports(){
+    data=A.load();
+    const ymKey=document.getElementById("repYm").value;
+    const pay=A.computePayrollForMonth(data, ymKey);
+    const tb=document.getElementById("repTbody"); tb.innerHTML="";
+    pay.rows.forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML =
+        '<td>'+r.name+'</td><td>'+(r.department||"—")+'</td><td>'+A.money(r.salary)+'</td>'
+       +'<td>'+A.minutesToHM(r.totalOTMinutes)+'</td><td>'+A.money(r.overtimeValue)+'</td>'
+       +'<td>'+A.minutesToHM(r.totalLateMinutes)+'</td><td>'+A.money(r.lateDeduction)+'</td>'
+       +'<td>'+A.minutesToHM(r.totalEarlyMinutes)+'</td><td>'+A.money(r.earlyDeduction)+'</td>'
+       +'<td>'+A.money(r.advances)+'</td>'
+       +'<td><b>'+A.money(r.net)+'</b></td>'
+       +'<td><button class="btn blue" data-slip="'+r.employeeId+'">صك</button></td>';
+      tb.appendChild(tr);
+    });
+  }
+  document.getElementById("refreshRepBtn").addEventListener("click", renderReports);
+  document.getElementById("repYm").addEventListener("change", renderReports);
+
+  const modal=document.getElementById("modal");
+  const modalBody=document.getElementById("modalBody");
+  document.getElementById("modalCloseBtn").addEventListener("click", ()=>modal.classList.remove("show"));
+  document.getElementById("modalPrintBtn").addEventListener("click", ()=>{
+    const w=window.open("","_blank");
+    w.document.open();
+    w.document.write('<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Pay Slip</title></head><body>'+modalBody.innerHTML+'</body></html>');
+    w.document.close(); w.focus(); w.print();
+  });
+  document.getElementById("repTbody").addEventListener("click",(e)=>{
+    const btn=e.target.closest("button[data-slip]"); if(!btn) return;
+    const ymKey=document.getElementById("repYm").value;
+    modalBody.innerHTML=A.buildPaySlipHTML(A.load(), ymKey, btn.dataset.slip);
+    modal.classList.add("show");
+  });
+
+  document.getElementById("exportRepBtn").addEventListener("click", ()=>{
+    data=A.load();
+    const ymKey=document.getElementById("repYm").value;
+    const pay=A.computePayrollForMonth(data, ymKey);
+    const headers=["اسم الموظف","القسم","الراتب","إجمالي الإضافي (ساعات)","قيمة الإضافي","إجمالي التأخير (ساعات)","خصم التأخير","إجمالي الانصراف المبكر (ساعات)","خصم الانصراف المبكر","السلف","المستحق"];
+    const rows=pay.rows.map(r=>[
+      r.name, r.department, r.salary,
+      (r.totalOTMinutes/60).toFixed(2), r.overtimeValue.toFixed(2),
+      (r.totalLateMinutes/60).toFixed(2), r.lateDeduction.toFixed(2),
+      (r.totalEarlyMinutes/60).toFixed(2), r.earlyDeduction.toFixed(2),
+      r.advances.toFixed(2), r.net.toFixed(2)
+    ]);
+    const esc=(v)=>{const s=String(v??""); return /[,"\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+    const out=[headers.map(esc).join(",")].concat(rows.map(r=>r.map(esc).join(","))).join("\n");
+    A.downloadText("payroll_"+ymKey+".csv", out, "text/csv;charset=utf-8");
+  });
+
+  showTab("attendance");
+})();
+</script>
+
+  </div>
+
+  <div class="toast" id="toast">
+    <div class="t">—</div>
+    <div class="m">—</div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="box">
+      <div class="box-h">
+        <b id="modalTitle">—</b>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn green" id="modalPrintBtn">طباعة / حفظ PDF</button>
+          <button class="btn" id="modalCloseBtn">إغلاق</button>
+        </div>
+      </div>
+      <div class="box-b" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script src="./assets/app.js"></script>
+</body>
+</html>
